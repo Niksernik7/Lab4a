@@ -1,5 +1,7 @@
 #include "Menu.h"
 #include <string.h>
+#include <limits.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
 
