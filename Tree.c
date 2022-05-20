@@ -55,7 +55,7 @@ bool Insert(Tree* tree, char* key, size_t data){
         }
     }
     Node* newElem = calloc(1, sizeof(Node));
-    newElem->key = key;
+    newElem->key = strdup(key);
     newElem->data = data;
     newElem->parent = ptr;
     if (ptr == NULL) {
@@ -85,20 +85,29 @@ void WalkTree(Node* node, void (*cb)(Node *node, void *arg), void *arg){
 
 //Поиск элемента c наименьшим значением ключа, превышающим заданное.
 
-Node* FindMinElemGreaterThen(Node* node, const char* key, Node** res)
-{
-    if (node == NULL)
-        return NULL;
-    if (node->left != NULL){
-        FindMinElemGreaterThen(node->left, key, res);
-    }
-    if (strcmp(node->key, key) > 0 && strcmp(node->key, (*res)->key) < 0)
-        *res = node;
+Node* FindMinElemGreaterThen(Tree* tree, const char* key) {
+    //  Если мы в узле с ключом <= key, то двигаемся вправо
+    // Иначе сравниваем ключ с ранее найденным (если такой был)
+    // и сохраняем наименьший, затем двигаемся влево
 
-    if (node->right != NULL){
-        FindMinElemGreaterThen(node->right, key, res);
+
+    if (tree == NULL)
+        return NULL;
+    Node* ptr = tree->root;
+    Node* res = NULL;
+    while (ptr != NULL) {
+        int i = strcmp(ptr->key, key);
+        if (i <= 0){
+            ptr = ptr->right;
+        }
+        else if (i > 0) {
+            if (res == NULL || strcmp(res->key, ptr->key) < 0){
+                res = ptr;
+                ptr = ptr->left;
+            }
+        }
     }
-    return *res;
+    return res;
 }
 
 bool DeleteByKey(Tree* tree, char* key){
@@ -113,6 +122,9 @@ bool DeleteByKey(Tree* tree, char* key){
             else
                 node->parent->right = NULL;
         }
+        if (node == tree->root)
+            tree->root = NULL;
+        free(node->key);
         free(node);
         return true;
     }
@@ -135,7 +147,7 @@ bool DeleteByKey(Tree* tree, char* key){
 
 
 void SwapNodes(Node* node1, Node* node2) {
-    char* sbuf;
+    const char* sbuf;
     size_t ibuf;
     sbuf = node1->key;
     ibuf = node1->data;

@@ -7,42 +7,14 @@
 #include <windows.h>
 #endif
 
-char* enterString()
-{
-    char buf[81] = { 0 };
-    char* res = NULL;
-    size_t len = 0;
-    int n;
-    do {
-        n = scanf("%80[^\n]", buf);
-        if (n < 0)
-        {
-            if (!res)
-            {
-                return NULL;
-            }
-        }
-        else if (n > 0) {
-            size_t chunk_len = strlen(buf);
-            size_t str_len = len + chunk_len;
-            res = realloc(res, str_len + 2);
-            memcpy(res + len, buf, chunk_len);
-            len = str_len;
-        }
-        else {
-            scanf("%*c");
-        }
-    } while (n > 0);
-    if (len > 0)
-    {
-        res[len] = '\0';
-    }
-    else {
-        res = calloc(1, sizeof(char));
-        if (res != NULL)
-            *res = '\0';
-    }
-    return res;
+char* enterString() {
+    const int bufsize = 1000;
+    char* buf = malloc(bufsize);
+    buf = fgets(buf, bufsize, stdin);
+    size_t len = strlen(buf);
+    if (len > 0 && buf[len - 1] == '\n')
+        buf[len - 1] = '\0';
+    return buf;
 }
 void ShowFindMenu() {
     printf("Find\n");
@@ -215,9 +187,8 @@ void FindInTree(Tree* tree, size_t mod) {
             printf("Enter:\n");
             printf(" Key : ");
             char* key = enterString();
-            Node** res = NULL;
             Node* node;
-            node = FindMinElemGreaterThen(node, key, res);
+            node = FindMinElemGreaterThen(tree, key);
             if (node != NULL) {
                 printNode(node);
             } else printf("Doesn't exist\n");
@@ -229,8 +200,10 @@ void FindInTree(Tree* tree, size_t mod) {
             printf(" Key : ");
             char *key = enterString();
             Node* node = Find(tree, key);
+            if (node != NULL) {
+                printNode(node);
+            } else printf("Doesn't exist\n");
             free(key);
-            printNode(node);
             break;
         }
         default:
@@ -244,7 +217,7 @@ char* get_str(const Node* item) {
     size_t lenkey = strlen(item->key);
     size_t buflen = lenkey + 3 + 30 + 1;
     char* s = malloc(buflen);
-    snprintf(s, buflen, "%s | %zu");
+    snprintf(s, buflen, "%s | %zu", item->key, item->data);
     return s;
 }
 
@@ -298,10 +271,19 @@ void PrintGV(Tree* tree){
 
 void GenerateGV(Node* node, void* p){      //callback(cb)
     FILE* f = p;
+    static size_t nullcount = 0;
     if (node->left != NULL){
-        fprintf(f, "\"%s: %zu\" -> \"%s: %zu\"\n", node->key, node->data, node->left->key, node->left->data);
+        fprintf(f, "\"%s: %zu\" -> \"%s: %zu\"\n",
+                node->key, node->data, node->left->key, node->left->data);
+    } else {
+        fprintf(f, "\"%s: %zu\" -> \"null%d\"\n", node->key, node->data, nullcount);
+        nullcount++;
     }
     if (node->right != NULL){
-        fprintf(f, "\"%s: %zu\" -> \"%s: %zu\"\n", node->key, node->data, node->right->key, node->right->data);
+        fprintf(f, "\"%s: %zu\" -> \"%s: %zu\"\n",
+                node->key, node->data, node->right->key, node->right->data);
+    } else {
+        fprintf(f, "\"%s: %zu\" -> \"null%d\"\n", node->key, node->data, nullcount);
+        nullcount++;
     }
 }

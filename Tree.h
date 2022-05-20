@@ -9,7 +9,7 @@
 
 
 typedef struct Node{
-    const char* key;
+    char* key;
     size_t data;
     struct Node* right;
     struct Node* left;
@@ -27,7 +27,7 @@ void WalkTree(Node* node, void (*cb)(Node *node, void *arg), void *arg);
 Node* Find(Tree*, const char*);
 bool Insert(Tree*, char*, size_t);
 bool DeleteByKey(Tree* tree, char* key);
-Node* FindMinElemGreaterThen(Node*, const char*, Node**);
+Node* FindMinElemGreaterThen(Tree*, const char*);
 
 void SwapNodes(Node*, Node*);
 char* get_str(const Node*);
