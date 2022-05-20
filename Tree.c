@@ -145,6 +145,18 @@ void SwapNodes(Node* node1, Node* node2) {
     node2->data = ibuf;
 }
 
-void FreeTree(Tree* tree){
+void FreeNode(Node *node) {
+    if (!node) {
+        return;
+    }
 
-};
+    FreeNode(node->left);
+    FreeNode(node->right);
+
+    free(node);
+}
+
+void FreeTree(Tree *tree) {
+    FreeNode(tree->root);
+    free(tree);
+}
